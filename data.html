@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Data Page</title>
+  </head>
+  <body>
+
+    <nav style="background-color: red; padding: 15px; " >
+       <a style="color: white; text-decoration: solid; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; " href="dashboard.html">Dashboard</a>
+    </nav>
+
+    <h1>Data Page</h1>
+
+
+
+    <label for="sort">Sort by Price:</label>
+    <select id="sort" onchange="sortData()">
+      <option value="asc">Ascending</option>
+      <option value="desc">Descending</option>
+    </select>
+
+    <label for="filter">Filter by Category:</label>
+    <select id="filter" onchange="filterData()">
+      <option value="all">All</option>
+      <option value="Music">Music</option>
+      <option value="Sports">Sports</option>
+      <option value="Workshop">Workshop</option>
+      
+    </select>
+
+    <div id="userContainer">
+      
+    </div>
+
+
+    <script>
+      let userData = []; // This array will store the fetched user data
+
+      // Function to fetch user data from JSON server and display cards
+      function fetchUserData() {
+        fetch("https://masaiversaaaaa.onrender.com/events")
+          .then((response) => response.json())
+          .then((data) => {
+            userData = data;
+            displayUserCards();
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+     
+      function displayUserCards() {
+        const userContainer = document.getElementById("userContainer");
+        userContainer.innerHTML = "";
+
+        
+        userData.forEach((user) => {
+          const card = document.createElement("div");
+          card.classList.add("user-card");
+
+          card.innerHTML = `
+          <img src="${user.image}" alt="User Image">
+          <p>Name: ${user.name}</p>
+          <p>Age: ${user.description}</p>
+          <p>Place: ${user.date}</p>
+          <p>Batch: ${user.location}</p>
+          <p>Profession: ${user.category}</p>
+          <p>Price: ${user.price}</p>
+      
+        `;
+
+          userContainer.appendChild(card);
+        });
+      }
+
+    
+      function sortData() {
+        const sortType = document.getElementById("sort").value;
+        userData.sort((a, b) =>
+          sortType === "asc" ? a.price - b.price : b.price - a.price
+        );
+        displayUserCards();
+      }
+
+     
+      function filterData() {
+        const filterValue = document.getElementById("filter").value;
+        if (filterValue === "all") {
+          displayUserCards();
+        } else {
+          const filteredData = userData.filter(
+            (user) => user.category === filterValue
+          );
+          displayFilteredCards(filteredData);
+        }
+      }
+
+     
+      function displayFilteredCards(filteredData) {
+        const userContainer = document.getElementById("userContainer");
+        userContainer.innerHTML = "";
+
+        filteredData.forEach((user) => {
+          const card = document.createElement("div");
+          card.classList.add("user-card");
+
+          card.innerHTML = `
+          <img src= ${user.image} alt="User Image">
+          <p>Name: ${user.name}</p>
+          <p>Age: ${user.description}</p>
+          <p>Place: ${user.date}</p>
+          <p>Batch: ${user.location}</p>
+          <p>Profession: ${user.category}</p>
+          <p>Price: ${user.price}</p>
+      
+        `;
+
+          userContainer.appendChild(card);
+        });
+      }
+
+      
+      function searchByName() {
+        const searchValue = document
+          .getElementById("search")
+          .value.toLowerCase();
+        const filteredData = userData.filter((user) =>
+          user.name.toLowerCase().includes(searchValue)
+        );
+        displayFilteredCards(filteredData);
+      }
+
+     
+      function deleteUser(userId) {
+        fetch(`https://masaiversaaaaa.onrender.com/registrations/${userId}`, {
+          method: "DELETE",
+        })
+          .then((response) => response.json())
+          .then(() => {
+           alert("Are you sure you want to delete")
+            fetchUserData();
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+     
+      function editUser(userId) {
+        const user = userData.find((user) => user.id === userId);
+        const editModal = document.getElementById("editModal");
+        const editForm = document.getElementById("editForm");
+
+     
+        document.getElementById("editName").value = user.name;
+        document.getElementById("editAge").value = user.age;
+        document.getElementById("editPlace").value = user.place;
+        document.getElementById("editBatch").value = user.batch;
+        document.getElementById("editProfession").value = user.profession;
+
+        editModal.style.display = "block";
+
+        const closeModal = document.getElementsByClassName("close")[0];
+        closeModal.onclick = function () {
+          editModal.style.display = "none";
+        };
+
+        editForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const editedName = document.getElementById("editName").value;
+          const editedAge = document.getElementById("editAge").value;
+          const editedPlace = document.getElementById("editPlace").value;
+          const editedBatch = document.getElementById("editBatch").value;
+          const editedProfession =
+            document.getElementById("editProfession").value;
+
+          const editedUser = {
+            id: user.id,
+            name: editedName,
+            age: editedAge,
+            place: editedPlace,
+            batch: editedBatch,
+            profession: editedProfession,
+          };
+
+          const userIndex = userData.findIndex((user) => user.id === userId);
+          userData[userIndex] = editedUser;
+
+          fetch(`https://masaiversaaaaa.onrender.com/registrations/${userId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(editedUser),
+          })
+            .then((response) => response.json())
+            .then(() => {
+              // Fetch updated user data after saving the changes
+              fetchUserData();
+
+              editModal.style.display = "none";
+            })
+            .catch((error) => console.error("Error:", error));
+        });
+      }
+
+      
+
+      window.addEventListener("load", (event) => {
+        fetchUserData();
+     
+      });
+    </script>
+
+    <style>
+     
+      .user-card {
+        width: 200px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+
+      .user-card > img {
+        width: 100%;
+      }
+
+      #userContainer{
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        margin-top: 50px;
+      }
+
+     
+    </style>
+  </body>
+</html>

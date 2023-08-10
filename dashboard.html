@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Masaiverse Events</title>
+</head>
+<body>
+  <nav style="background-color: red; padding: 15px; " >
+    <a style="color: white; text-decoration: solid; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; " href="data.html">Events</a>
+ </nav>
+
+  <div style="display: flex; margin: auto; width: 80%;" >
+    <div style="width: 40%;" >
+      <h1>Masaiverse Meetup Registration Form</h1>
+      <form id="registrationForm">
+        <label for="image">Poster:</label>
+        <input type="text" id="image" required><br>
+    
+        <label for="name">Name:</label>
+        <input type="text" id="name" required><br>
+    
+        <label for="description">Description:</label>
+        <input type="text" id="description" required><br>
+    
+        <label for="date">Date:</label>
+        <input type="date"  id="date" required><br>
+    
+        <label for="location">Location:</label>
+        <input type="text" id="location" required><br>
+    
+        <label for="category">Category:</label>
+        <select id="category" required>
+          <option value="Music">Music</option>
+          <option value="Sports">Sports</option>
+          <option value="Workshop">Workshop</option>
+          <!-- Add more options as needed -->
+        </select><br>
+    
+        <label for="price">Price:</label>
+        <input type="text" id="price" required><br>
+    
+        <button type="submit"  >Register</button>
+      </form>
+    
+    </div>
+
+    <div style="width: 40%;" >
+      <h1>Reports Page</h1>
+
+  <table id="reportTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Location</th>
+        <th>Price</th>
+      </tr>
+    </thead>
+    <tbody>
+     
+
+    </tbody>
+  </table>
+    </div>
+  </div>
+ 
+  
+  <script>
+    document.getElementById("registrationForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+    registerUser();
+  });
+
+  function registerUser() {
+    const image = document.getElementById("image").value;
+    const name = document.getElementById("name").value;
+    const description = document.getElementById("description").value;
+    const date = document.getElementById("date").value;
+    const location = document.getElementById("location").value;
+    const category = document.getElementById("category").value;
+    const price = document.getElementById("price").value;
+
+    const registrationData = {
+      
+      image : image,
+      name: name,
+      description: description,
+      date: date,
+      location: location,
+      category: category,
+      price: price,
+    };
+
+    fetch("https://masaiversaaaaa.onrender.com/events", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(registrationData),
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert("Successfully registered!");
+     window.location.reload(true)
+    })
+    .catch(error => console.error("Error:", error));
+  }
+
+  let bag = []
+  let url = "https://masaiversaaaaa.onrender.com/events"
+
+  async function getdata(){
+    try {
+      let res = await fetch(url)
+      let out = await res.json()
+      console.log(out)
+      displaytable(out)
+    } catch (error) {
+      alert(error)
+    }
+  }
+
+  getdata()
+
+  let tbody = document.querySelector("tbody")
+
+  function displaytable(out){
+    document.querySelector("tbody").innerHTML=""
+
+    out.forEach((ele , i)=>{
+      let row = document.createElement("tr")
+
+      let td1 = document.createElement("td")
+      td1.innerText = ele.name
+
+      let td2 = document.createElement("td")
+      td2.innerText = ele.date
+
+      let td3 = document.createElement("td")
+      td3.innerText = ele.location
+
+      let td4 = document.createElement("td")
+      td4.innerText = ele.price
+
+      let td5 = document.createElement("button")
+      td5.innerText = "Delete"
+
+      td5.addEventListener("click" , function (el) {
+       deleteUser()
+      })
+
+
+      
+    row.append(td1 , td2 , td3 , td4 , td5)
+    tbody.append(row)
+    })
+
+    function deleteUser(id) {
+        fetch(`https://masaiversaaaaa.onrender.com/events/${id}`, {
+          method: "DELETE",
+        })
+          .then((response) => response.json())
+          .then(() => {
+           alert("Are you sure you want to delete")
+            getdata();
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+  }
+  </script> 
+  
+  
+  <style>
+    
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    
+  </style>
+
+
+</body>
+</html>
